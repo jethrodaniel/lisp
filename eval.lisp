@@ -243,7 +243,8 @@
             (eval (cadar clauses) env)))))
 
 (define bind
-  ; Make a new frame for an environment structure.
+  ; Associate some variables with values, i.e, make a new frame for an
+  ; environment structure.
   ;
   ; An environment structure is represented as a list of frames.
   ;
@@ -268,10 +269,31 @@
     (cond
       ((eq? vars '())
        (cond ((eq? vals '()) '())
-             (else (error TMA))))  ; got values, but no vars
-      ((eq? vals '()) (error TFA)) ; got vars, no values
+             (else (error TMA))))  ; too many arguments
+      ((eq? vals '()) (error TFA)) ; too few arguments
       (else
         (cons (cons (car vars)
                     (car vals))
               (pair-up (cdr vars)
                        (cdr vals)))))))
+
+(define lookup
+  ; Lookup a symbol in a given environment.
+  ;
+  ;
+  (lambda (sym env)
+          ; If the environment's empty, we have an unbound variable.
+          ;
+    (cond ((eq? env '()) (error UBV)) ; unbound variable
+          ; Otherwise, the environment must have a first frame, so we lookup the
+          ; symbol in the first frame using `assq` - that may be empty if
+          ; `assq` didn't match, and if so, we continue to loop through the
+          ; environment until we find the mapping for our symbol.
+          ;
+          (else
+            ((lambda (vcell)
+               (cond ((eq? vcell '())
+                      (lookup sym
+                              (cdr env)))
+                     (else (cdr vcell))))
+             (assq sym (car env)))))))
