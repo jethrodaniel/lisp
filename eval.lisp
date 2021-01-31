@@ -50,6 +50,8 @@
   ; We need the help of a few things here:
   ; - evcond
   ; - evlist
+  ; - lookup
+  ; - bind
   ;
   (lambda (exp env)
           ; If it's a number, return the number.
@@ -209,12 +211,34 @@
                   (evlist (cdr l) env))))))
 
 (define evcond
+  ; To evaluate a conditional, we need to:
+  ;
+  ; 1. Test each clause, i.e, evaluate it's predicate
+  ; 2. When we find a "true" predicate, we evaluate it's body
+  ; 3. If we don't find a "true" predicate, we evaluate the `else` body
+  ;
   (lambda (clauses env)
+          ; If we have no clauses, return the empty list.
+          ;
     (cond ((eq ? clauses '()) '())
+
+          ; If we only have an `else` clause, evaluate it's body.
+          ;
+          ; `caar` is first clause, 1st element.
+          ; `cadar` is first clause, 2nd element.
+          ;
           ((eq ? (caar clauses) 'else)
            (eval (cadar clauses) env))
+
+          ; If the first predicate of clauses is false, then we need to try
+          ; the next clause, i.e, discard the first clause.
+          ;
           ((false ? (eval (caar clauses) env))
            (evcond (cdr clauses) env))
+
+          ; Otherwise, we had a "true" clause, so we want to evaluate it's
+          ; body.
+          ;
           (else
             (eval (cadar clauses) env)))))
 
