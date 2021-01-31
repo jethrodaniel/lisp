@@ -46,37 +46,63 @@
 
 (define eval
   (lambda (exp env)
-          ; if its a number, ret the number
+          ; If it's a number, return the number.
+          ;
+          ; ```
+          ; 3 -> 3
+          ; ```
+          ;
     (cond ((number ? exp) exp)
 
-          ; if a symbol, look it up
+          ; If it's a symbol, look it up to get the value.
+          ;
+          ; ```
+          ; x -> x
+          ; ```
+          ;
           ((symbol ? exp) (lookup exp env))
 
-          ; if it's a quote, return the quoted thing
+          ; If it's a quote, return the quoted entity.
+          ;
+          ; ```
+          ; 'foo -> (quote foo) -> foo
+          ; ```
+          ;
+          ; Note that `'literal` is simply syntactic sugar for
+          ; `(quote literal)`, which is expanded "before" evaluating.
+          ;
           ((eq ? (car exp) 'quote) (cadr exp))
-          
-          ; if it's a lambda, return closures for the exp
+
+          ; If it's a lambda, return a closure for the lambda within
+          ; the current env.
+          ;
+          ; ```
+          ; (lambda add (a b))
+          ; ```
+          ;
           ((eq ? (car exp) 'lambda)
             (list 'closure (cdr exp) env))
 
-          ; if a conditional, evaluate it
+          ; If it's a conditional, evaluate it in the current env.
+          ;
+          ; ```
+          ; (cond (test1 exp1)
+          ;       (test2 exp2)
+          ;       (testn exp3))
+          ; ```
+          ;
           ((eq ? (car exp) 'cond)
             (eval cond (cdr exp) env))
-          
-          ; default combination - evaluate the operator and apply it
+
+          ; Otherwise, we need to evaluate the operator and apply it to
+          ; it's arguments, if any.
+          ;
+          ; ```
+          ; (+ 3 4)
+          ; ```
+          ;
           (else (apply (eval (car exp) env)
                        (eval (cdr exp) env))))))
-
-; first 5 are special forms
-
-; primitives
-; lookup
-; apply
-; eval
-; cond
-; list
-; evcond
-; evlist
 
 (define apply
   (lambda (proc args)
