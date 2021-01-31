@@ -45,6 +45,12 @@
 ; See https://stackoverflow.com/a/13112481
 
 (define eval
+  ; The universal function, i.e, `eval`.
+  ;
+  ; We need the help of a few things here:
+  ; - evcond
+  ; - evlist
+  ;
   (lambda (exp env)
           ; If it's a number, return the number.
           ;
@@ -78,6 +84,7 @@
           ;
           ; ```
           ; (lambda add (a b))
+          ; (lambda x (+ x y)) ; -> (closure ((x)(+ x y)) <env>)
           ; ```
           ;
           ((eq ? (car exp) 'lambda)
@@ -92,7 +99,7 @@
           ; ```
           ;
           ((eq ? (car exp) 'cond)
-            (eval cond (cdr exp) env))
+            (evcond (cdr exp) env))
 
           ; Otherwise, we need to evaluate the operator and apply it to
           ; it's arguments, if any.
@@ -102,22 +109,76 @@
           ; ```
           ;
           (else (apply (eval (car exp) env)
-                       (eval (cdr exp) env))))))
+                       (evlist (cdr exp) env))))))
+
+; The `kernel` is the group of basic primitives we need
+;  - apply
 
 (define apply
+  ; Take a procedure and arguments, and calls the procedure with
+  ; the arguements.
+  ;
+  ; We need the help of a few things here:
+  ; - primitive
+  ; - apply-primop
+  ; - bind
+  ;
   (lambda (proc args)
+           ; If this is a primitive, just magically get the answer.
+           ;
+           ; Exactly "how" we know the procedure is a primitive is not known.
+           ; Well, it's not essential, since we don't need any primitives
+           ; anyway.
+           ;
+           ; ```
+           ; (list a b)
+           ; ```
+           ;
     (cond ((primitive ? proc)
+           ; This is magic that we won't explain - drop to machine language
+           ; here.
+           ;
            (apply-primop proc args))
+
+          ; If it's a closure, then we have to do an `eval` of the body.
+          ;
+          ; The way we evalute the application of a procedure to its
+          ; arguments is by evaulating the body of the procedure in the
+          ; environment resulting from extending the environment of the
+          ; procedure with the bindings of the formal parameters of the
+          ; procedure to the arguments that were passed to it.
+          ;
+          ; ```
+          ; (closure ((<args>) (<body>)) <env>)
+          ; ```
+          ;
           ((eq ? (car proc) 'closure)
+            ; The `cadadr` of the procedure
+            ;
+            ; The body is the 2nd element of the 2nd element of the
+            ; procedure, i.e, the `cadadr` of the procedure.
+            ;
             (eval (cadadr proc)
+                  ; The `caadr` of the procedure is the bound variable list,
+                  ; i.e, the arguments to the procedure.
+                  ;
+                  ; So we need to create a new environment to eval the
+                  ; conditional's body in, which we make by combining the
+                  ; bound variables, the arguments, and the environment of
+                  ; the closure.
+                  ;
                   (bind (caadr proc)
                         args
                         (caddr proc))))
-          ; might have to ask, is this compiled code?
-          ; is this a fortran program to execute?
-          ; note: there's a builtin assumption that this is lisp
-          ;   there is an abstract version of this that is beyond the syntax,
-          ;   as such, we could rewrite in algol
+
+          ; Do the error handling you'd like here:
+          ;
+          ; Did you try to apply 1 to an argument?
+          ;   Then you'll get an undefined procedure type.
+          ;
+          ; We might, for instance, need to determine,
+          ; "is this compiled code?".
+          ;
           (else error))))
 
 (define evlist
