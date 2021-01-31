@@ -182,8 +182,28 @@
           (else error))))
 
 (define evlist
+  ; Evaluate a list.
+  ;
+  ; `l` is a list.
+  ;
   (lambda (l env)
+          ; If the list is an empty list, return the empty list.
+          ;
     (cond ((eq ? l ()) '())
+          ; Otherwise, we need to map the list to each item's evaluation.
+          ;
+          ; Refresher: `cons` "constructs" a list from 2 elements. So the
+          ; following are identical:
+          ;
+          ; ```
+          ; (cons 1 (cons 2 (cons 3 nil)))
+          ; (list 1 2 3)
+          ; (1 . (2 . (3 . nil)))
+          ; (1 2 3)
+          ; ```
+          ;
+          ; So we're "reconstructing" the list with it's evaluations.
+          ;
           (else
             (cons (eval (car l) env)
                   (evlist (cdr l) env))))))
