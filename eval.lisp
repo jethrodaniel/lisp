@@ -297,3 +297,14 @@
                               (cdr env)))
                      (else (cdr vcell))))
              (assq sym (car env)))))))
+
+(define assq
+  ; Lookup a symbol in a list of pairs, return the first match, or an empty
+  ; list if no match is found.
+  ;
+  (lambda (sym alist)
+    (cond ((eq? alist '()) '())
+          ((eq? sym (car alist))
+           (car alist))
+          (else
+            (assq sym (cdr alist))))))
