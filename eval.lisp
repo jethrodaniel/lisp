@@ -243,6 +243,13 @@
             (eval (cadar clauses) env)))))
 
 (define bind
+  ; Make a new frame for an environment structure.
+  ;
+  ; An environment structure is represented as a list of frames.
+  ;
+  ; So bind adds the new elements to the environment frame in order to
+  ; make a new environment.
+  ;
   (lambda (vars vals env)
     (cons (pair-up vars vals)
-          end)))
+          env)))
