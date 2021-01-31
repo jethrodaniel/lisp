@@ -253,3 +253,25 @@
   (lambda (vars vals env)
     (cons (pair-up vars vals)
           env)))
+
+(define pair-up
+  ; Map a list of variables to their values.
+  ;
+  ; We handle the error cases of
+  ; - values, but no vars
+  ; - vars, but no values
+  ;
+  ; Otherwise, we construct the mapping by taking the first variable to
+  ; value mapping, and `cons`ing it with the rest of the mappings, recursively.
+  ;
+  (lambda (vars vals)
+    (cond
+      ((eq? vars '())
+       (cond ((eq? vals '()) '())
+             (else (error TMA))))  ; got values, but no vars
+      ((eq? vals '()) (error TFA)) ; got vars, no values
+      (else
+        (cons (cons (car vars)
+                    (car vals))
+              (pair-up (cdr vars)
+                       (cdr vals)))))))
