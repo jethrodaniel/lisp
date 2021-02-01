@@ -1,13 +1,12 @@
 ; Notes and code taken when viewing the following MIT lecture (1986):
 ; `Lecture 7B: Metacircular Evaluator, Parts 1 and 2`.
 ;
+; `Structure and Interpretation of Computer Programs`, by
+;   Harold Abelson and Gerald Jay Sussman
+;
 ; - part 1 - https://www.youtube.com/watch?v=aAlR3cezPJg
 ; - part 2 - https://www.youtube.com/watch?v=QVEOq5k6Xi0
-;
-; The instructor is one of the following (not sure which):
-;   - Harold Abelson
-;   - Gerald Jay Sussman
-;   - Julie Sussman
+
 
 ; Some shorthand:
 ;
@@ -308,3 +307,10 @@
            (car alist))
           (else
             (assq sym (cdr alist))))))
+
+; The above implements the "kernel" of all languages.
+;
+; Cue the eval-apply M.C Escher sketch with the hands.
+;
+
+
