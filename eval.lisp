@@ -6,7 +6,8 @@
 ;
 ; - part 1 - https://www.youtube.com/watch?v=aAlR3cezPJg
 ; - part 2 - https://www.youtube.com/watch?v=QVEOq5k6Xi0
-
+;
+; The lecturer is Gerald Jay Sussman.
 
 ; Some shorthand:
 ;
