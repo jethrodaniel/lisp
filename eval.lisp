@@ -313,4 +313,122 @@
 ; Cue the eval-apply M.C Escher sketch with the hands.
 ;
 
+; Now let's evaluate an example by hand.
+;
+; e0 - some initial, global, environment
+;
+; This is a procedure of one argument x, which produces as a value a procedure
+; of one argument y which adds x to y.
+;
+; We are applying this to 3, which should return 3, and 4, which returns 4,
+; then adds them. That is, this is the long form of
+;
+; ```
+; (+ 3 4)
+; ```
+;
+; e0 looks like this - it's the initial values the machine is born with.
+;
+; ```
+; +: ...
+; -: ...
+; car: ...
+; cdr: ...
+; ```
+;
+(eval '(((lambda (x) (lambda (y) (+ x y))) 3) 4) e0)
+
+; Which reduces to:
+;
+(apply (eval '((lambda (x) (lambda (y) (+ x y))) 3) <e0>)
+       (evlist '(4) <e0>)
+
+; Which reduces to:
+;
+(apply (eval '((lambda (x) (lambda (y) (+ x y))) 3) <e0>)
+       (cons (eval '4 <e0>)
+             (evlist '() <e0>)))
+
+; Which reduces to:
+;
+(apply (eval '((lambda (x) (lambda (y) (+ x y))) 3) <e0>)
+       (cons (4 '())))
+
+; Which reduces to:
+;
+(apply (eval '((lambda (x) (lambda (y) (+ x y))) 3) <e0>)
+       (cons (4)))
+
+; Which reduces to:
+;
+(apply (apply (eval '(lambda (x) (lambda (y) (+ x y))) <e0>)
+              '(3))
+       '(4))
+
+; Which reduces to:
+;
+(apply (apply '(closure ((x) (x y) (+ x y))) <e0>)
+              '(3))
+       '(4))
+
+; Which reduces to:
+;
+(apply (apply '(closure ((x) (x y) (+ x y))) <e0>)
+              '(3)
+       '(4))
+
+; The `closure` introduces a `bind`, so we need to create a new environment
+;
+; ```
+; e0 --> +-----------------------+
+;        | car: ..  +: ..  *: .. |
+;        | cdr: ..  -: ..  x: .. | <--+
+;        +-----------------------+    |
+;                                     |
+;                                     +-------+
+; e1 -------------------------------> | x = 3 | <--+
+;              +--+ +--+------------> +-------+    |
+;         +--> |  |-|  |                  +--------+
+;         |    +--+ +--+                  |
+;         |                           +-------+
+;      lambda (y) = e2           +--> | x = 4 |
+;                   |            |    +-------+
+;                   |            |
+;                   +------------+
+; ```
+
+(apply (eval '(lambda (y) (+ x y)) <e1>)
+       '(4))
+
+(apply '(closure ((y) (+ x y)) <e1>)
+       '(4))
+
+(eval '(+ x y) <e2>)
+
+(apply (eval '+ <e2>)
+       (evlist '(x y) <e2>))
+
+(apply <+> '(3 4))
+
+; eval produces a procedure and arguments for apply
+;
+; ```
+;         +---- proc, args ----+
+;         |                    |
+; eval ---+                    +--> apply
+;      <--+                    +---
+;         |                    |
+;         +---- exp, env  -----+
+;
+; ```
+;
+; `eval` may do some things on it's own (well, not use this loop)
+; - evlist
+; - evcond
+;
+; Similarly, `apply` may do some things outside of this loop
+; - `apply-primop`
+;
+; But those aren't the general `eval-apply`.
+
 
