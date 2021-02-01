@@ -433,3 +433,12 @@
 ; But those aren't the general `eval-apply`.
 
 
+(define exp
+  ; Exponential function, using recursion.
+  ;
+  (lambda (x n)
+    (cond ((= n 0) 1)
+          (else
+            (* x (exp x (- n 1)))))))
+
+; First part of this lecture ends with an explanation of lambda calculus.
